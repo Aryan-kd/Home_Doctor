@@ -44,8 +44,15 @@ diseases_list = {15: 'Fungal infection', 4: 'Allergy', 16: 'GERD', 9: 'Chronic c
 # Model Prediction function
 def get_predicted_value(patient_symptoms):
     input_vector = np.zeros(len(symptoms_dict))
+    flag = True
     for item in patient_symptoms:
-        input_vector[symptoms_dict[item]] = 1
+        if item in symptoms_dict:
+            flag = False
+            input_vector[symptoms_dict[item]] = 1
+        else:
+            continue
+    if(flag):
+        return -1
     return diseases_list[svc.predict([input_vector])[0]]
 
 
@@ -63,11 +70,10 @@ def index():
 def home():
     if request.method == 'POST':
         symptoms = request.form.get('symptoms')
-        # mysysms = request.form.get('mysysms')
-        # print(mysysms)
         print(symptoms)
-        if symptoms =="Symptoms":
-            message = "Please either write symptoms or you have written misspelled symptoms"
+
+        if symptoms =="":
+            message = "Please enter the symptoms"
             return render_template('index.html', message=message)
         else:
 
@@ -76,6 +82,10 @@ def home():
             # Remove any extra characters, if any
             user_symptoms = [symptom.strip("[]' ") for symptom in user_symptoms]
             predicted_disease = get_predicted_value(user_symptoms)
+            if(predicted_disease == -1):
+                message = "Non of the Enter Symptoms Present! Please try again"
+                return render_template('index.html', message=message)
+
             dis_des, precautions, medications, rec_diet, workout = helper(predicted_disease)
 
             my_precautions = []
