@@ -70,7 +70,6 @@ def index():
 def home():
     if request.method == 'POST':
         symptoms = request.form.get('symptoms')
-        print(symptoms)
 
         if symptoms =="":
             message = "Please enter the symptoms"
@@ -79,21 +78,32 @@ def home():
 
             # Split the user's input into a list of symptoms (assuming they are comma-separated)
             user_symptoms = [s.strip() for s in symptoms.split(',')]
+
             # Remove any extra characters, if any
             user_symptoms = [symptom.strip("[]' ") for symptom in user_symptoms]
+            
             predicted_disease = get_predicted_value(user_symptoms)
+            
             if(predicted_disease == -1):
                 message = "Non of the Enter Symptoms Present! Please try again"
                 return render_template('index.html', message=message)
 
             dis_des, precautions, medications, rec_diet, workout = helper(predicted_disease)
 
+            # creating precautions list to work with
             my_precautions = []
             for i in precautions[0]:
                 my_precautions.append(i)
 
+            # medications list 
+            my_medications = []
+            medications = medications[0]
+            medications = medications.split("'")[1:-1:2]
+            for i in medications:
+                my_medications.append(i)
+
             return render_template('index.html', predicted_disease=predicted_disease, dis_des=dis_des,
-                                   my_precautions=my_precautions, medications=medications, my_diet=rec_diet,
+                                   my_precautions=my_precautions, medications=my_medications, my_diet=rec_diet,
                                    workout=workout)
 
     return render_template('index.html')
